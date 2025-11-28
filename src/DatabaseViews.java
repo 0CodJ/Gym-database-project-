@@ -1,3 +1,4 @@
+//This java file was made so the App.java does not have 1000+ lines of code. 
 import java.sql.*;
 
 public class DatabaseViews {
@@ -43,8 +44,18 @@ public class DatabaseViews {
             while (rs.next()) {
                 hasMembers = true;
                 int memberID = rs.getInt("memberID");
-                String firstName = rs.getString("firstName") != null ? rs.getString("firstName") : "";
-                String lastName = rs.getString("lastName") != null ? rs.getString("lastName") : "";
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
                 
                 String birthday;
                 java.sql.Date birthdayDate = rs.getDate("birthday");
@@ -253,8 +264,18 @@ public class DatabaseViews {
             while (rs.next()) {
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
-                String firstName = rs.getString("firstName") != null ? rs.getString("firstName") : "";
-                String lastName = rs.getString("lastName") != null ? rs.getString("lastName") : "";
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
                 String phoneNumber = rs.getString("phoneNumber");
                 if (phoneNumber == null) {
                     phoneNumber = "(null)";
@@ -341,8 +362,18 @@ public class DatabaseViews {
             while (rs.next()) {
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
-                String firstName = rs.getString("firstName") != null ? rs.getString("firstName") : "";
-                String lastName = rs.getString("lastName") != null ? rs.getString("lastName") : "";
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
                 String phoneNumber = rs.getString("phoneNumber");
                 if (phoneNumber == null) {
                     phoneNumber = "(null)";
@@ -440,8 +471,18 @@ public class DatabaseViews {
             while (rs.next()) {
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
-                String firstName = rs.getString("firstName") != null ? rs.getString("firstName") : "";
-                String lastName = rs.getString("lastName") != null ? rs.getString("lastName") : "";
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
                 String phoneNumber = rs.getString("phoneNumber");
                 if (phoneNumber == null) {
                     phoneNumber = "(null)";
@@ -544,8 +585,18 @@ public class DatabaseViews {
             while (rs.next()) {
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
-                String firstName = rs.getString("firstName") != null ? rs.getString("firstName") : "";
-                String lastName = rs.getString("lastName") != null ? rs.getString("lastName") : "";
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
                 String phoneNumber = rs.getString("phoneNumber");
                 if (phoneNumber == null) {
                     phoneNumber = "(null)";
@@ -885,8 +936,18 @@ public class DatabaseViews {
             while (rs.next()) {
                 hasMembers = true;
                 int memberID = rs.getInt("memberID");
-                String firstName = rs.getString("firstName") != null ? rs.getString("firstName") : "";
-                String lastName = rs.getString("lastName") != null ? rs.getString("lastName") : "";
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
                 
                 String birthday;
                 java.sql.Date birthdayDate = rs.getDate("birthday");
