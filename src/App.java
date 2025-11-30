@@ -83,6 +83,9 @@ public class App {
                     case 10:
                         DatabaseInsertions.purchaseMembership(conn, scanner);
                         break;
+                    case 11:
+                        DatabaseInsertions.insertStaffMember(conn, scanner);
+                        break;
                     case 0:
                         running = false;
                         System.out.println("Exiting...");
@@ -130,8 +133,9 @@ public class App {
         System.out.println("8. View Trainer Trains Member");
         System.out.println("-------------------------------------");
         System.out.println("Insertion Options:");
-        System.out.println("9. Insert Gym Member");
+        System.out.println("9. Add new Gym Member");
         System.out.println("10. Purchase Membership");
+        System.out.println("11. Insert Staff Member");
         System.out.println("-------------------------------------");
         System.out.println("\n0. Exit");
         System.out.println("=====================================");

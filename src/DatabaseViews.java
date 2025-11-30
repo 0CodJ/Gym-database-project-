@@ -751,9 +751,12 @@ public class DatabaseViews {
     }
 
     public static void viewPayments(Connection conn) throws SQLException {
-        String sql = "SELECT p.paymentID, p.staffID, p.memberID, p.amount, " +
-                     "       p.paymentType, p.dateOfPayment, p.status " +
+        String sql = "SELECT p.paymentID, p.staffID, sm.firstName AS staffFirstName, sm.lastName AS staffLastName, " +
+                     "       p.memberID, gm.firstName AS memberFirstName, gm.lastName AS memberLastName, " +
+                     "       p.amount, p.paymentType, p.dateOfPayment, p.status " +
                      "FROM Payment p " +
+                     "LEFT JOIN StaffMember sm ON p.staffID = sm.staffID " +
+                     "LEFT JOIN GymMember gm ON p.memberID = gm.memberID " +
                      "ORDER BY p.paymentID;";
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -772,7 +775,34 @@ public class DatabaseViews {
                 hasPayments = true;
                 int paymentID = rs.getInt("paymentID");
                 int staffID = rs.getInt("staffID");
+                
+                String staffFirstName = rs.getString("staffFirstName");
+                if (staffFirstName == null) {
+                    staffFirstName = "";
+                }
+                String staffLastName = rs.getString("staffLastName");
+                if (staffLastName == null) {
+                    staffLastName = "";
+                }
+                String staffName = (staffFirstName + " " + staffLastName).trim();
+                if (staffName.isEmpty()) {
+                    staffName = "(null)";
+                }
+                
                 int memberID = rs.getInt("memberID");
+                
+                String memberFirstName = rs.getString("memberFirstName");
+                if (memberFirstName == null) {
+                    memberFirstName = "";
+                }
+                String memberLastName = rs.getString("memberLastName");
+                if (memberLastName == null) {
+                    memberLastName = "";
+                }
+                String memberName = (memberFirstName + " " + memberLastName).trim();
+                if (memberName.isEmpty()) {
+                    memberName = "(null)";
+                }
                 
                 String amountStr;
                 Double amount = rs.getDouble("amount");
@@ -803,7 +833,9 @@ public class DatabaseViews {
                 rows.add(new String[]{
                     String.valueOf(paymentID),
                     String.valueOf(staffID),
+                    staffName,
                     String.valueOf(memberID),
+                    memberName,
                     amountStr,
                     paymentType,
                     dateOfPayment,
@@ -817,8 +849,8 @@ public class DatabaseViews {
             }
             
             // Calculate column widths
-            int[] colWidths = {12, 10, 12, 12, 15, 15, 12}; //temporary column widths
-            String[] headers = {"Payment ID", "Staff ID", "Member ID", "Amount", "Payment Type", "Date of Payment", "Status"};
+            int[] colWidths = {12, 10, 20, 12, 25, 12, 15, 15, 12}; //temporary column widths
+            String[] headers = {"Payment ID", "Staff ID", "Staff Name", "Member ID", "Member Name", "Amount", "Payment Type", "Date of Payment", "Status"};
             
             // Adjust widths based on actual data
             for (int i = 0; i < headers.length; i++) {
