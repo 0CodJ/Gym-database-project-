@@ -1,5 +1,6 @@
 //This java file was made so the App.java does not have 1000+ lines of code. 
 import java.sql.*;
+import java.util.Scanner;
 
 public class DatabaseViews {
 
@@ -212,7 +213,7 @@ public class DatabaseViews {
             }
             
             // Calculate column widths
-            int[] colWidths = {10, 15, 15, 15, 15, 12, 12, 12}; //temporary column widths
+            int[] colWidths = {0,0,0,0,0,0,0,0}; //temporary column widths
             String[] headers = {"Member ID", "First Name", "Last Name", "Status", "Plan Type", "Price", "Start Date", "End Date"};
             
             // Adjust widths based on actual data
@@ -235,6 +236,8 @@ public class DatabaseViews {
             }
         }
     }
+
+    
 
     public static void viewAllStaffMembers(Connection conn) throws SQLException {
         String sql = "SELECT sm.staffID, sm.firstName, sm.lastName, sm.phoneNumber, " +
@@ -1014,6 +1017,134 @@ public class DatabaseViews {
             for (String[] row : rows) {
                 printTableRow(row, colWidths);
             }
+        }
+    }
+
+    // Helper method to get integer input from user
+    private static int getIntInput(Scanner scanner, String prompt) {
+        System.out.print(prompt);
+        if (!scanner.hasNextInt()) {
+            scanner.next(); // consume the invalid input
+            scanner.nextLine(); // consume newline
+            return -1; // return invalid value to trigger default case
+        }
+        int value = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+        return value;
+    }
+
+    public static void viewTrainerTrainsMember(Connection conn) throws SQLException {
+        String sql = "SELECT ttm.trainerID, sm.firstName AS trainerFirstName, sm.lastName AS trainerLastName, " +
+                     "       ttm.memberID, gm.firstName AS memberFirstName, gm.lastName AS memberLastName " +
+                     "FROM TrainerTrainsMember ttm " +
+                     "INNER JOIN Trainer t ON ttm.trainerID = t.staffID " +
+                     "INNER JOIN StaffMember sm ON t.staffID = sm.staffID " +
+                     "INNER JOIN GymMember gm ON ttm.memberID = gm.memberID " +
+                     "ORDER BY ttm.trainerID, ttm.memberID;";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            System.out.println("\n=== Trainer Trains Member ===");
+            System.out.println();
+            System.out.println("This table shows the relationships between trainers and members, including the trainer ID, trainer name, member ID, and member name.");
+            System.out.println();
+
+            // Collect all data first to determine column widths
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasRelationships = false;
+            
+            while (rs.next()) {
+                hasRelationships = true;
+                int trainerID = rs.getInt("trainerID");
+                
+                String trainerFirstName = rs.getString("trainerFirstName");
+                if (trainerFirstName == null) {
+                    trainerFirstName = "(null)";
+                }
+                
+                String trainerLastName = rs.getString("trainerLastName");
+                if (trainerLastName == null) {
+                    trainerLastName = "(null)";
+                }
+                
+                int memberID = rs.getInt("memberID");
+                
+                String memberFirstName = rs.getString("memberFirstName");
+                if (memberFirstName == null) {
+                    memberFirstName = "(null)";
+                }
+                
+                String memberLastName = rs.getString("memberLastName");
+                if (memberLastName == null) {
+                    memberLastName = "(null)";
+                }
+                
+                rows.add(new String[]{
+                    String.valueOf(trainerID),
+                    trainerFirstName + " " + trainerLastName,
+                    String.valueOf(memberID),
+                    memberFirstName + " " + memberLastName
+                });
+            }
+            
+            if (!hasRelationships) {
+                System.out.println("No trainer-member relationships in the database");
+                return;
+            }
+            
+            // Calculate column widths
+            int[] colWidths = {12, 25, 12, 25}; //temporary column widths
+            String[] headers = {"Trainer ID", "Trainer Name", "Member ID", "Member Name"};
+            
+            // Adjust widths based on actual data
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            //Display output 
+            // Print table header
+            printTableRow(headers, colWidths);
+            printTableSeparator(colWidths);
+            
+            // Print data rows
+            for (String[] row : rows) {
+                printTableRow(row, colWidths);
+            }
+        }
+    }
+
+    public static void viewStaffMembers(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("\n=== Staff Members Menu ===");
+        System.out.println("1. View All Staff Members");
+        System.out.println("2. View Desk Staff Only");
+        System.out.println("3. View Trainers Only");
+        System.out.println("4. View Managers Only");
+        System.out.println("0. Back to Main Menu");
+        
+        int choice = getIntInput(scanner, "Enter your choice: ");
+        
+        switch (choice) {
+            case 1:
+                viewAllStaffMembers(conn);
+                break;
+            case 2:
+                viewDeskStaff(conn);
+                break;
+            case 3:
+                viewTrainers(conn);
+                break;
+            case 4:
+                viewManagers(conn);
+                break;
+            case 0:
+                return;
+            default:
+                System.out.println("Invalid input.");
         }
     }
 }

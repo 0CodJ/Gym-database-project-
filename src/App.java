@@ -40,6 +40,7 @@ public class App {
             return;
         }
 
+
         // Main menu loop
         boolean running = true;
         System.out.println("Welcome to the Gym Database Management System!");
@@ -59,7 +60,7 @@ public class App {
                         DatabaseViews.viewAllMemberships(conn);
                         break;
                     case 3:
-                        viewStaffMembers();
+                        DatabaseViews.viewStaffMembers(conn, scanner);
                         break;
                     case 4:
                         DatabaseViews.viewPlans(conn);
@@ -72,6 +73,12 @@ public class App {
                         break;
                     case 7:
                         DatabaseViews.viewActiveMembers(conn);
+                        break;
+                    case 8:
+                        DatabaseViews.viewTrainerTrainsMember(conn);
+                        break;
+                    case 9:
+                        DatabaseInsertions.insertGymMember(conn, scanner);
                         break;
                     case 0:
                         running = false;
@@ -101,6 +108,7 @@ public class App {
         }
     }
 
+    //Method that shows the main mennu and options for the user to select from
     private static void printMainMenu() {
         System.out.println("=====================================");
         System.out.println(" Gym Database Management System Menu");
@@ -116,6 +124,10 @@ public class App {
         System.out.println("5. View Payments");
         System.out.println("6. View Check-Ins");
         System.out.println("7. View Active Members");
+        System.out.println("8. View Trainer Trains Member");
+        System.out.println("-------------------------------------");
+        System.out.println("Insertion Options:");
+        System.out.println("9. Insert Gym Member");
         System.out.println("-------------------------------------");
         System.out.println("\n0. Exit");
         System.out.println("=====================================");
@@ -132,35 +144,4 @@ public class App {
         scanner.nextLine(); // consume newline
         return value;
     }
-
-    private static void viewStaffMembers() throws SQLException {
-        System.out.println("\n=== Staff Members Menu ===");
-        System.out.println("1. View All Staff Members");
-        System.out.println("2. View Desk Staff Only");
-        System.out.println("3. View Trainers Only");
-        System.out.println("4. View Managers Only");
-        System.out.println("0. Back to Main Menu");
-        
-        int choice = getIntInput("Enter your choice: ");
-        
-        switch (choice) {
-            case 1:
-                DatabaseViews.viewAllStaffMembers(conn);
-                break;
-            case 2:
-                DatabaseViews.viewDeskStaff(conn);
-                break;
-            case 3:
-                DatabaseViews.viewTrainers(conn);
-                break;
-            case 4:
-                DatabaseViews.viewManagers(conn);
-                break;
-            case 0:
-                return;
-            default:
-                System.out.println("Invalid input.");
-        }
-    }
-
 }
