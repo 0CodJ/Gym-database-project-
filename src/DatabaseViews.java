@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class DatabaseViews {
 
     // Used to print the table rows in a organized way 
-    private static void printTableRow(String[] values, int[] widths) {
+    public static void printTableRow(String[] values, int[] widths) {
         System.out.print("|");
         for (int i = 0; i < values.length; i++) {
             System.out.printf(" %-" + widths[i] + "s |", values[i]);
@@ -14,7 +14,7 @@ public class DatabaseViews {
     }
 
     // Used to make the columns in the table much more organized 
-    private static void printTableSeparator(int[] widths) {
+    public static void printTableSeparator(int[] widths) {
         System.out.print("+");
         for (int width : widths) {
             for (int i = 0; i < width + 2; i++) {

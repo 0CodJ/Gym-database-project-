@@ -259,17 +259,50 @@ public class DatabaseInsertions {
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             System.out.println("\nAvailable Plans:");
-            System.out.println("+----------+------------------+----------+");
-            System.out.println("| Plan ID  | Plan Type        | Price    |");
-            System.out.println("+----------+------------------+----------+");
+            
+            // Collect all data first to determine column widths
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasPlans = false;
             
             while (rs.next()) {
+                hasPlans = true;
                 int planID = rs.getInt("planID");
                 String planType = rs.getString("planType");
                 double price = rs.getDouble("price");
-                System.out.printf("| %-8d | %-16s | $%-7.2f |%n", planID, planType, price);
+                rows.add(new String[]{
+                    String.valueOf(planID),
+                    planType,
+                    "$" + String.format("%.2f", price)
+                });
             }
-            System.out.println("+----------+------------------+----------+");
+            
+            if (!hasPlans) {
+                System.out.println("No plans available in the database.");
+                return;
+            }
+            
+            // Calculate column widths
+            int[] colWidths = {0, 0, 0}; // temporary column widths
+            String[] headers = {"Plan ID", "Plan Type", "Price"};
+            
+            // Adjust widths based on actual data
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            // Display output
+            DatabaseViews.printTableRow(headers, colWidths);
+            DatabaseViews.printTableSeparator(colWidths);
+            
+            // Print data rows
+            for (String[] row : rows) {
+                DatabaseViews.printTableRow(row, colWidths);
+            }
         }
     }
 
@@ -283,17 +316,49 @@ public class DatabaseInsertions {
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             System.out.println("\nAvailable Desk Staff:");
-            System.out.println("+----------+------------------+");
-            System.out.println("| Staff ID | Name             |");
-            System.out.println("+----------+------------------+");
+            
+            // Collect all data first to determine column widths
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasDeskStaff = false;
             
             while (rs.next()) {
+                hasDeskStaff = true;
                 int staffID = rs.getInt("staffID");
                 String firstName = rs.getString("firstName");
                 String lastName = rs.getString("lastName");
-                System.out.printf("| %-8d | %-16s |%n", staffID, firstName + " " + lastName);
+                rows.add(new String[]{
+                    String.valueOf(staffID),
+                    firstName + " " + lastName
+                });
             }
-            System.out.println("+----------+------------------+");
+            
+            if (!hasDeskStaff) {
+                System.out.println("No desk staff available in the database.");
+                return;
+            }
+            
+            // Calculate column widths
+            int[] colWidths = {0, 0}; // temporary column widths
+            String[] headers = {"Staff ID", "Name"};
+            
+            // Adjust widths based on actual data
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            // Display output
+            DatabaseViews.printTableRow(headers, colWidths);
+            DatabaseViews.printTableSeparator(colWidths);
+            
+            // Print data rows
+            for (String[] row : rows) {
+                DatabaseViews.printTableRow(row, colWidths);
+            }
         }
     }
 
