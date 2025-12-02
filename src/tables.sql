@@ -1,12 +1,13 @@
 -- Added DROP statement in case we need to reset all tables 
-DROP TABLE IF EXISTS TrainerTrainsMember, CheckIn, Payment, Membership, GuestVisit, Guest, Manager, Trainer, Desk, StaffMember, Plan, PlanType, GymMember;
+DROP TABLE IF EXISTS TrainerTrainsMember, CheckIn, Payment, Membership, GuestVisit, Guest, Manager, Trainer, Desk, StaffMember, Plan, PlanTypeInfo, GymMember;
 
--- Order of creation, PlanType & Plan, GymMember, StaffMember & Subentities, Guest & GuestVisit, Membership, Payment, CheckIn, TrainerTrainsMember
+-- Order of creation, PlanTypeInfo & Plan, GymMember, StaffMember & Subentities, Guest & GuestVisit, Membership, Payment, CheckIn, TrainerTrainsMember
 -- This is done so we can make the foreign key connections properly 
 
 -- ____________________________________________________________
--- PlanType & Plan Table (these are connected)
-CREATE TABLE PlanType (
+-- PlanTypeInfo & Plan Table (these are connected)
+-- Note: Table renamed from PlanType to PlanTypeInfo to avoid ambiguity with planType attribute
+CREATE TABLE PlanTypeInfo (
   planType ENUM('Monthly', 'Monthly Premium', 'Annual') PRIMARY KEY,
   price DECIMAL(10,2) NOT NULL,
   CHECK (price > 0)
@@ -15,7 +16,7 @@ CREATE TABLE PlanType (
 CREATE TABLE Plan (
   planID INT AUTO_INCREMENT PRIMARY KEY,
   planType ENUM('Monthly','Monthly Premium', 'Annual') NOT NULL,
-  FOREIGN KEY (planType) REFERENCES PlanType(planType)
+  FOREIGN KEY (planType) REFERENCES PlanTypeInfo(planType)
     ON UPDATE CASCADE
     ON DELETE RESTRICT
 );
@@ -144,6 +145,7 @@ CREATE TABLE CheckIn (
   staffID INT NOT NULL,
   ts DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- had to change timestamp attribute name to ts so sql doesn't get confused 
   location VARCHAR(50),
+  
   FOREIGN KEY (membershipID) REFERENCES Membership(membershipID)
     ON UPDATE CASCADE
     ON DELETE CASCADE,

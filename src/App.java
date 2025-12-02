@@ -72,18 +72,30 @@ public class App {
                         DatabaseViews.viewCheckIns(conn);
                         break;
                     case 7:
-                        DatabaseViews.viewActiveMembers(conn);
+                        DatabaseViews.viewActiveMembersView(conn);
                         break;
                     case 8:
                         DatabaseViews.viewTrainerTrainsMember(conn);
                         break;
                     case 9:
-                        DatabaseInsertions.insertGymMember(conn, scanner);
+                        DatabaseViews.viewGuestMembers(conn);
                         break;
                     case 10:
-                        DatabaseInsertions.purchaseMembership(conn, scanner);
+                        DatabaseViews.viewGuestVisits(conn);
                         break;
                     case 11:
+                        DatabaseViews.viewMemberPaymentHistory(conn, scanner);
+                        break;
+                    case 12:
+                        DatabaseViews.viewTotalRevenue(conn, scanner);
+                        break;
+                    case 13:
+                        DatabaseInsertions.insertGymMember(conn, scanner);
+                        break;
+                    case 14:
+                        DatabaseInsertions.purchaseMembership(conn, scanner);
+                        break;
+                    case 15:
                         DatabaseInsertions.insertStaffMember(conn, scanner);
                         break;
                     case 0:
@@ -131,11 +143,15 @@ public class App {
         System.out.println("6. View Check-Ins");
         System.out.println("7. View Active Members");
         System.out.println("8. View Trainer Trains Member");
+        System.out.println("9. View Guest Members");
+        System.out.println("10. View Guest Visits");
+        System.out.println("11. View Member Payment History (Stored Procedure)");
+        System.out.println("12. Calculate Total Revenue (Stored Function)");
         System.out.println("-------------------------------------");
         System.out.println("Insertion Options:");
-        System.out.println("9. Add new Gym Member");
-        System.out.println("10. Purchase Membership");
-        System.out.println("11. Insert Staff Member");
+        System.out.println("13. Add new Gym Member");
+        System.out.println("14. Purchase Membership");
+        System.out.println("15. Insert Staff Member");
         System.out.println("-------------------------------------");
         System.out.println("\n0. Exit");
         System.out.println("=====================================");

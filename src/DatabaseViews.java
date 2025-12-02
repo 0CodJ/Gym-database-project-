@@ -132,7 +132,7 @@ public class DatabaseViews {
                      "FROM Membership ms " +
                      "LEFT JOIN GymMember gm ON ms.memberID = gm.memberID " +
                      "LEFT JOIN Plan p ON ms.planID = p.planID " +
-                     "LEFT JOIN PlanType pt ON p.planType = pt.planType " +
+                     "LEFT JOIN PlanTypeInfo pt ON p.planType = pt.planType " +
                      "ORDER BY ms.memberID;";
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -657,7 +657,7 @@ public class DatabaseViews {
                 return;
             }
             
-            int[] colWidths = {10, 15, 15, 15, 25, 12, 12, 20, 20, 10};
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             String[] headers = {"Staff ID", "First Name", "Last Name", "Phone Number", "Email", "Hire Date", "Salary", "Department", "Office Location", "Experience"};
             
             for (int i = 0; i < headers.length; i++) {
@@ -681,7 +681,7 @@ public class DatabaseViews {
     public static void viewPlans(Connection conn) throws SQLException {
         String sql = "SELECT p.planID, pt.planType, pt.price " +
                      "FROM Plan p " +
-                     "JOIN PlanType pt ON p.planType = pt.planType " +
+                     "JOIN PlanTypeInfo pt ON p.planType = pt.planType " +
                      "ORDER BY p.planID;";
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -949,109 +949,6 @@ public class DatabaseViews {
         }
     }
 
-    public static void viewActiveMembers(Connection conn) throws SQLException {
-        String sql = "SELECT DISTINCT gm.memberID, gm.firstName, gm.lastName, " +
-                     "       gm.birthday, gm.phoneNumber, gm.email, gm.dateJoined " +
-                     "FROM GymMember gm " +
-                     "INNER JOIN Membership ms ON gm.memberID = ms.memberID " +
-                     "WHERE ms.status = 'Active' " +
-                     "ORDER BY gm.memberID;";
-
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            System.out.println("\n=== Active Members ===");
-            System.out.println();
-            System.out.println("This table shows all gym members who have an active membership, including the member ID, first name, last name, birthday, phone number, email, and date joined.");
-            System.out.println();
-
-            // Collect all data first to determine column widths
-            java.util.List<String[]> rows = new java.util.ArrayList<>();
-            boolean hasMembers = false;
-            
-            while (rs.next()) {
-                hasMembers = true;
-                int memberID = rs.getInt("memberID");
-                String firstName;
-                if (rs.getString("firstName") != null) {
-                    firstName = rs.getString("firstName");
-                } else {
-                    firstName = "";
-                }
-                String lastName;
-                if (rs.getString("lastName") != null) {
-                    lastName = rs.getString("lastName");
-                } else {
-                    lastName = "";
-                }
-                
-                String birthday;
-                java.sql.Date birthdayDate = rs.getDate("birthday");
-                if (rs.wasNull() || birthdayDate == null) {
-                    birthday = "(null)";
-                } else {
-                    birthday = birthdayDate.toString();
-                }
-                
-                String phoneNumber = rs.getString("phoneNumber");
-                if (phoneNumber == null) {
-                    phoneNumber = "(null)";
-                }
-                
-                String email = rs.getString("email");
-                if (email == null) {
-                    email = "(null)";
-                }
-                
-                String dateJoined;
-                java.sql.Date dateJoinedDate = rs.getDate("dateJoined");
-                if (rs.wasNull() || dateJoinedDate == null) {
-                    dateJoined = "(null)";
-                } else {
-                    dateJoined = dateJoinedDate.toString();
-                }
-                
-                rows.add(new String[]{
-                    String.valueOf(memberID),
-                    firstName,
-                    lastName,
-                    birthday,
-                    phoneNumber,
-                    email,
-                    dateJoined
-                });
-            }
-            
-            if (!hasMembers) {
-                System.out.println("No active members in the database");
-                return;
-            }
-            
-            // Calculate column widths
-            int[] colWidths = {10, 15, 15, 12, 15, 25, 12}; //temporary column widths
-            String[] headers = {"Member ID", "First Name", "Last Name", "Birthday", "Phone Number", "Email", "Date Joined"};
-            
-            // Adjust widths based on actual data
-            for (int i = 0; i < headers.length; i++) {
-                colWidths[i] = Math.max(colWidths[i], headers[i].length());
-            }
-            for (String[] row : rows) {
-                for (int i = 0; i < row.length; i++) {
-                    colWidths[i] = Math.max(colWidths[i], row[i].length());
-                }
-            }
-            
-            //Display output 
-            // Print table header
-            printTableRow(headers, colWidths);
-            printTableSeparator(colWidths);
-            
-            // Print data rows
-            for (String[] row : rows) {
-                printTableRow(row, colWidths);
-            }
-        }
-    }
-
     // Helper method to get integer input from user
     private static int getIntInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
@@ -1150,6 +1047,221 @@ public class DatabaseViews {
         }
     }
 
+    // Case 9 function to view guest members
+    public static void viewGuestMembers(Connection conn) throws SQLException {
+        String sql = "SELECT g.guestID, g.firstName, g.lastName, g.birthday, " +
+                     "       g.relationshipToMember, g.memberID, " +
+                     "       gm.firstName AS memberFirstName, gm.lastName AS memberLastName " +
+                     "FROM Guest g " +
+                     "LEFT JOIN GymMember gm ON g.memberID = gm.memberID " +
+                     "ORDER BY g.guestID;";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            System.out.println("\n=== Guest Members ===");
+            System.out.println();
+            System.out.println("This table shows all guest members and their details, including the guest ID, first name, last name, birthday, relationship to member, member ID, and the member's name.");
+
+            // Collect all data first to determine column widths
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasGuests = false;
+            
+            while (rs.next()) {
+                hasGuests = true;
+                int guestID = rs.getInt("guestID");
+                
+                String firstName;
+                if (rs.getString("firstName") != null) {
+                    firstName = rs.getString("firstName");
+                } else {
+                    firstName = "";
+                }
+                
+                String lastName;
+                if (rs.getString("lastName") != null) {
+                    lastName = rs.getString("lastName");
+                } else {
+                    lastName = "";
+                }
+                
+                String birthday;
+                java.sql.Date birthdayDate = rs.getDate("birthday");
+                if (rs.wasNull() || birthdayDate == null) {
+                    birthday = "(null)";
+                } else {
+                    birthday = birthdayDate.toString();
+                }
+                
+                String relationshipToMember = rs.getString("relationshipToMember");
+                if (relationshipToMember == null) {
+                    relationshipToMember = "(null)";
+                }
+                
+                int memberID = rs.getInt("memberID");
+                
+                String memberFirstName = rs.getString("memberFirstName");
+                if (memberFirstName == null) {
+                    memberFirstName = "";
+                }
+                
+                String memberLastName = rs.getString("memberLastName");
+                if (memberLastName == null) {
+                    memberLastName = "";
+                }
+                
+                String memberName = memberFirstName + " " + memberLastName;
+                if (memberName.trim().isEmpty()) {
+                    memberName = "(null)";
+                }
+                
+                rows.add(new String[]{
+                    String.valueOf(guestID),
+                    firstName,
+                    lastName,
+                    birthday,
+                    relationshipToMember,
+                    String.valueOf(memberID),
+                    memberName
+                });
+            }
+            
+            if (!hasGuests) {
+                System.out.println("No guest members in the database");
+                return;
+            }
+            
+            // Calculate column widths
+            int[] colWidths = {10, 15, 15, 12, 25, 10, 25}; // temporary column widths
+            String[] headers = {"Guest ID", "First Name", "Last Name", "Birthday", "Relationship to Member", "Member ID", "Member Name"};
+            
+            // Adjust widths based on actual data
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            // Display output
+            // Print table header
+            printTableRow(headers, colWidths);
+            printTableSeparator(colWidths);
+            
+            // Print data rows
+            for (String[] row : rows) {
+                printTableRow(row, colWidths);
+            }
+        }
+    }
+
+    // Case 10 function to view guest visits
+    public static void viewGuestVisits(Connection conn) throws SQLException {
+        String sql = "SELECT gv.visitID, gv.guestID, g.firstName AS guestFirstName, g.lastName AS guestLastName, " +
+                     "       gv.visitDate, g.memberID, " +
+                     "       gm.firstName AS memberFirstName, gm.lastName AS memberLastName " +
+                     "FROM GuestVisit gv " +
+                     "LEFT JOIN Guest g ON gv.guestID = g.guestID " +
+                     "LEFT JOIN GymMember gm ON g.memberID = gm.memberID " +
+                     "ORDER BY gv.visitID;";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            System.out.println("\n=== Guest Visits ===");
+            System.out.println();
+            System.out.println("This table shows all guest visits, including the visit ID, guest ID, guest name, visit date, member ID, and the member's name.");
+
+            // Collect all data first to determine column widths
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasVisits = false;
+            
+            while (rs.next()) {
+                hasVisits = true;
+                int visitID = rs.getInt("visitID");
+                int guestID = rs.getInt("guestID");
+                
+                String guestFirstName = rs.getString("guestFirstName");
+                if (guestFirstName == null) {
+                    guestFirstName = "";
+                }
+                
+                String guestLastName = rs.getString("guestLastName");
+                if (guestLastName == null) {
+                    guestLastName = "";
+                }
+                
+                String guestName = guestFirstName + " " + guestLastName;
+                if (guestName.trim().isEmpty()) {
+                    guestName = "(null)";
+                }
+                
+                String visitDate;
+                java.sql.Date visitDateObj = rs.getDate("visitDate");
+                if (rs.wasNull() || visitDateObj == null) {
+                    visitDate = "(null)";
+                } else {
+                    visitDate = visitDateObj.toString();
+                }
+                
+                int memberID = rs.getInt("memberID");
+                
+                String memberFirstName = rs.getString("memberFirstName");
+                if (memberFirstName == null) {
+                    memberFirstName = "";
+                }
+                
+                String memberLastName = rs.getString("memberLastName");
+                if (memberLastName == null) {
+                    memberLastName = "";
+                }
+                
+                String memberName = memberFirstName + " " + memberLastName;
+                if (memberName.trim().isEmpty()) {
+                    memberName = "(null)";
+                }
+                
+                rows.add(new String[]{
+                    String.valueOf(visitID),
+                    String.valueOf(guestID),
+                    guestName,
+                    visitDate,
+                    String.valueOf(memberID),
+                    memberName
+                });
+            }
+            
+            if (!hasVisits) {
+                System.out.println("No guest visits in the database");
+                return;
+            }
+            
+            // Calculate column widths
+            int[] colWidths = {10, 10, 25, 12, 10, 25}; // temporary column widths
+            String[] headers = {"Visit ID", "Guest ID", "Guest Name", "Visit Date", "Member ID", "Member Name"};
+            
+            // Adjust widths based on actual data
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            // Display output
+            // Print table header
+            printTableRow(headers, colWidths);
+            printTableSeparator(colWidths);
+            
+            // Print data rows
+            for (String[] row : rows) {
+                printTableRow(row, colWidths);
+            }
+        }
+    }
+
     public static void viewStaffMembers(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Staff Members Menu ===");
         System.out.println("1. View All Staff Members");
@@ -1177,6 +1289,279 @@ public class DatabaseViews {
                 return;
             default:
                 System.out.println("Invalid input.");
+        }
+    }
+
+    // Method to view active members using the ActiveMembersView
+    public static void viewActiveMembersView(Connection conn) throws SQLException {
+        String sql = "SELECT * FROM ActiveMembersView ORDER BY memberID;";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            System.out.println("\n=== Active Members (using VIEW) ===");
+            System.out.println();
+            System.out.println("This table shows all active members with their membership details using the ActiveMembersView, including member ID, member name, email, phone number, membership ID, start date, end date, plan type, and price.");
+
+            // Collect all data first to determine column widths
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasMembers = false;
+            
+            while (rs.next()) {
+                hasMembers = true;
+                int memberID = rs.getInt("memberID");
+                
+                String memberName = rs.getString("memberName");
+                if (memberName == null) {
+                    memberName = "(null)";
+                }
+                
+                String email = rs.getString("email");
+                if (email == null) {
+                    email = "(null)";
+                }
+                
+                String phoneNumber = rs.getString("phoneNumber");
+                if (phoneNumber == null) {
+                    phoneNumber = "(null)";
+                }
+                
+                int membershipID = rs.getInt("membershipID");
+                
+                String startDate;
+                java.sql.Date startDateObj = rs.getDate("startDate");
+                if (rs.wasNull() || startDateObj == null) {
+                    startDate = "(null)";
+                } else {
+                    startDate = startDateObj.toString();
+                }
+                
+                String endDate;
+                java.sql.Date endDateObj = rs.getDate("endDate");
+                if (rs.wasNull() || endDateObj == null) {
+                    endDate = "(null)";
+                } else {
+                    endDate = endDateObj.toString();
+                }
+                
+                String planType = rs.getString("planType");
+                if (planType == null) {
+                    planType = "(null)";
+                }
+                
+                String priceStr;
+                Double price = rs.getDouble("price");
+                if (rs.wasNull() || price == null) {
+                    priceStr = "(null)";
+                } else {
+                    priceStr = String.format("$%.2f", price);
+                }
+                
+                rows.add(new String[]{
+                    String.valueOf(memberID),
+                    memberName,
+                    email,
+                    phoneNumber,
+                    String.valueOf(membershipID),
+                    startDate,
+                    endDate,
+                    planType,
+                    priceStr
+                });
+            }
+            
+            if (!hasMembers) {
+                System.out.println("No active members in the database");
+                return;
+            }
+            
+            // Calculate column widths
+            int[] colWidths = {10, 25, 25, 15, 12, 12, 12, 20, 12}; // temporary column widths
+            String[] headers = {"Member ID", "Member Name", "Email", "Phone Number", "Membership ID", "Start Date", "End Date", "Plan Type", "Price"};
+            
+            // Adjust widths based on actual data
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            // Display output
+            // Print table header
+            printTableRow(headers, colWidths);
+            printTableSeparator(colWidths);
+            
+            // Print data rows
+            for (String[] row : rows) {
+                printTableRow(row, colWidths);
+            }
+        }
+    }
+
+    // Method to call the GetMemberPaymentHistory stored procedure
+    public static void viewMemberPaymentHistory(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("\n=== Member Payment History ===");
+        System.out.println();
+        
+        int memberID = getIntInput(scanner, "Enter member ID: ");
+        if (memberID <= 0) {
+            System.out.println("Error: Invalid member ID.");
+            return;
+        }
+        
+        // Call stored procedure using CallableStatement
+        String sql = "{call GetMemberPaymentHistory(?)}";
+        
+        try (CallableStatement cs = conn.prepareCall(sql)) {
+            // Set input parameter
+            cs.setInt(1, memberID);
+            
+            // Execute and get result set
+            boolean hasResults = cs.execute();
+            
+            if (hasResults) {
+                try (ResultSet rs = cs.getResultSet()) {
+                    System.out.println("\n=== Payment History for Member ID: " + memberID + " ===");
+                    System.out.println();
+                    
+                    // Collect all data first to determine column widths
+                    java.util.List<String[]> rows = new java.util.ArrayList<>();
+                    boolean hasPayments = false;
+                    
+                    while (rs.next()) {
+                        hasPayments = true;
+                        int paymentID = rs.getInt("paymentID");
+                        
+                        String amountStr;
+                        Double amount = rs.getDouble("amount");
+                        if (rs.wasNull() || amount == null) {
+                            amountStr = "(null)";
+                        } else {
+                            amountStr = String.format("$%.2f", amount);
+                        }
+                        
+                        String paymentType = rs.getString("paymentType");
+                        if (paymentType == null) {
+                            paymentType = "(null)";
+                        }
+                        
+                        String dateOfPayment;
+                        java.sql.Date dateOfPaymentObj = rs.getDate("dateOfPayment");
+                        if (rs.wasNull() || dateOfPaymentObj == null) {
+                            dateOfPayment = "(null)";
+                        } else {
+                            dateOfPayment = dateOfPaymentObj.toString();
+                        }
+                        
+                        String status = rs.getString("status");
+                        if (status == null) {
+                            status = "(null)";
+                        }
+                        
+                        String processedBy = rs.getString("processedBy");
+                        if (processedBy == null) {
+                            processedBy = "(null)";
+                        }
+                        
+                        rows.add(new String[]{
+                            String.valueOf(paymentID),
+                            amountStr,
+                            paymentType,
+                            dateOfPayment,
+                            status,
+                            processedBy
+                        });
+                    }
+                    
+                    if (!hasPayments) {
+                        System.out.println("No payment history found for member ID: " + memberID);
+                        return;
+                    }
+                    
+                    // Calculate column widths
+                    int[] colWidths = {12, 12, 15, 15, 12, 25}; // temporary column widths
+                    String[] headers = {"Payment ID", "Amount", "Payment Type", "Date of Payment", "Status", "Processed By"};
+                    
+                    // Adjust widths based on actual data
+                    for (int i = 0; i < headers.length; i++) {
+                        colWidths[i] = Math.max(colWidths[i], headers[i].length());
+                    }
+                    for (String[] row : rows) {
+                        for (int i = 0; i < row.length; i++) {
+                            colWidths[i] = Math.max(colWidths[i], row[i].length());
+                        }
+                    }
+                    
+                    // Display output
+                    // Print table header
+                    printTableRow(headers, colWidths);
+                    printTableSeparator(colWidths);
+                    
+                    // Print data rows
+                    for (String[] row : rows) {
+                        printTableRow(row, colWidths);
+                    }
+                }
+            }
+        }
+    }
+
+    // Method to call the CalculateTotalRevenue stored function
+    public static void viewTotalRevenue(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("\n=== Calculate Total Revenue ===");
+        System.out.println();
+        System.out.println("1. All Success payments (default)");
+        System.out.println("2. By specific status");
+        
+        int choice = getIntInput(scanner, "Enter choice (1-2): ");
+        if (choice < 1 || choice > 2) {
+            System.out.println("Error: Invalid choice. Using default (Success payments).");
+            choice = 1;
+        }
+        
+        String status = null;
+        if (choice == 2) {
+            System.out.println("\nPayment Status Options:");
+            System.out.println("- Success");
+            System.out.println("- Pending");
+            System.out.println("- Failed");
+            System.out.println("- Refunded");
+            System.out.print("Enter payment status: ");
+            status = scanner.nextLine().trim();
+            if (status.isEmpty()) {
+                status = null;
+            }
+        }
+        
+        // Call stored function using CallableStatement
+        String sql = "{? = call CalculateTotalRevenue(?)}";
+        
+        try (CallableStatement cs = conn.prepareCall(sql)) {
+            // Register output parameter (the return value)
+            cs.registerOutParameter(1, java.sql.Types.DECIMAL);
+            
+            // Set input parameter (can be null for default behavior)
+            if (status != null && !status.isEmpty()) {
+                cs.setString(2, status);
+            } else {
+                cs.setNull(2, java.sql.Types.VARCHAR);
+            }
+            
+            // Execute the function
+            cs.execute();
+            
+            // Get the return value
+            double totalRevenue = cs.getDouble(1);
+            
+            System.out.println("\n=== Total Revenue ===");
+            System.out.println();
+            if (status != null && !status.isEmpty()) {
+                System.out.printf("Total revenue for status '%s': $%.2f%n", status, totalRevenue);
+            } else {
+                System.out.printf("Total revenue (Success payments): $%.2f%n", totalRevenue);
+            }
         }
     }
 }

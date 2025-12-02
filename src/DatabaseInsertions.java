@@ -253,7 +253,7 @@ public class DatabaseInsertions {
     private static void displayPlans(Connection conn) throws SQLException {
         String sql = "SELECT p.planID, pt.planType, pt.price " +
                      "FROM Plan p " +
-                     "JOIN PlanType pt ON p.planType = pt.planType " +
+                     "JOIN PlanTypeInfo pt ON p.planType = pt.planType " +
                      "ORDER BY p.planID";
         
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -446,7 +446,7 @@ public class DatabaseInsertions {
             double planPrice = 0.0;
             String getPlanSql = "SELECT pt.planType, pt.price " +
                                "FROM Plan p " +
-                               "JOIN PlanType pt ON p.planType = pt.planType " +
+                               "JOIN PlanTypeInfo pt ON p.planType = pt.planType " +
                                "WHERE p.planID = ?";
             try (PreparedStatement ps = conn.prepareStatement(getPlanSql)) {
                 ps.setInt(1, planID);
