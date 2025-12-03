@@ -25,8 +25,10 @@ public class DatabaseViews {
         System.out.println();
     }
 
-    // Case 1 function to view the gym members and their memberships
+    // Case 1 method to view the GymMember table and the attributes 
     public static void viewGymMembers(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all the attributes from the GymMember table
         String sql = "SELECT gm.memberID, gm.firstName, gm.lastName, " +
                      "       gm.birthday, gm.phoneNumber, gm.email, gm.dateJoined " +
                      "FROM GymMember gm " +
@@ -42,7 +44,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasMembers = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop throguh each row in the result set 
                 hasMembers = true;
                 int memberID = rs.getInt("memberID");
                 String firstName;
@@ -100,8 +102,8 @@ public class DatabaseViews {
                 return;
             }
             
-            // Calculate column widths
-            int[] colWidths = {10, 15, 15, 12, 15, 25, 12}; //temporary column widths
+            // Portion that creates a visual table for output 
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0}; //temporary column widths
             String[] headers = {"Member ID", "First Name", "Last Name", "Birthday", "Phone Number", "Email", "Date Joined"};
             
             // Adjust widths based on actual data
@@ -126,7 +128,10 @@ public class DatabaseViews {
         }
     }
 
+    //Case 2 method that views all attributes from the Membership table
     public static void viewAllMemberships(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all attributes from Membership table 
         String sql = "SELECT ms.memberID, gm.firstName, gm.lastName, ms.status, " +
                      "       pt.planType, pt.price, ms.startDate, ms.endDate " +
                      "FROM Membership ms " +
@@ -147,7 +152,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasMemberships = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasMemberships = true;
                 int memberID = rs.getInt("memberID");
                 
@@ -212,7 +217,7 @@ public class DatabaseViews {
                 return;
             }
             
-            // Calculate column widths
+            // Portion that creates a visual table for output 
             int[] colWidths = {0,0,0,0,0,0,0,0}; //temporary column widths
             String[] headers = {"Member ID", "First Name", "Last Name", "Status", "Plan Type", "Price", "Start Date", "End Date"};
             
@@ -237,9 +242,10 @@ public class DatabaseViews {
         }
     }
 
-    
-
+    //Case 3 method that views all attributes from the StaffMember table
     public static void viewAllStaffMembers(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all attributes from StaffMember table 
         String sql = "SELECT sm.staffID, sm.firstName, sm.lastName, sm.phoneNumber, " +
                      "       sm.email, sm.hireDate, sm.salary, " +
                      "       CASE " +
@@ -264,7 +270,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasStaff = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
                 String firstName;
@@ -323,7 +329,8 @@ public class DatabaseViews {
                 return;
             }
             
-            int[] colWidths = {10, 15, 15, 15, 25, 12, 12, 10};
+            // Portion that creates a visual table for output 
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0, 0}; //temporary column widths
             String[] headers = {"Staff ID", "First Name", "Last Name", "Phone Number", "Email", "Hire Date", "Salary", "Role"};
             
             for (int i = 0; i < headers.length; i++) {
@@ -344,7 +351,10 @@ public class DatabaseViews {
         }
     }
 
+    //Sub method in View Staff Members case that views all attributes from the Desk table
     public static void viewDeskStaff(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all attributes from Desk table 
         String sql = "SELECT sm.staffID, sm.firstName, sm.lastName, sm.phoneNumber, " +
                      "       sm.email, sm.hireDate, sm.salary, " +
                      "       d.schedule, d.deskLocation, d.responsibility " +
@@ -362,7 +372,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasStaff = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
                 String firstName;
@@ -431,7 +441,8 @@ public class DatabaseViews {
                 return;
             }
             
-            int[] colWidths = {10, 15, 15, 15, 25, 12, 12, 20, 15, 20};
+            // Portion that creates a visual table for output 
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; //temporary column widths
             String[] headers = {"Staff ID", "First Name", "Last Name", "Phone Number", "Email", "Hire Date", "Salary", "Schedule", "Desk Location", "Responsibility"};
             
             for (int i = 0; i < headers.length; i++) {
@@ -452,7 +463,10 @@ public class DatabaseViews {
         }
     }
 
+    //Sub method in View Staff Members case that views all attributes from the Trainer table
     public static void viewTrainers(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all attributes from Trainer table 
         String sql = "SELECT sm.staffID, sm.firstName, sm.lastName, sm.phoneNumber, " +
                      "       sm.email, sm.hireDate, sm.salary, " +
                      "       t.specialty, t.schedule, t.certificationLevel, t.experience " +
@@ -471,7 +485,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasStaff = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasStaff = true;
                 int staffID = rs.getInt("staffID");
                 String firstName;
@@ -545,7 +559,7 @@ public class DatabaseViews {
                 return;
             }
             
-            int[] colWidths = {10, 15, 15, 15, 25, 12, 12, 20, 20, 20, 10};
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             String[] headers = {"Staff ID", "First Name", "Last Name", "Phone Number", "Email", "Hire Date", "Salary", "Specialty", "Schedule", "Certification Level", "Experience"};
             
             for (int i = 0; i < headers.length; i++) {
@@ -566,7 +580,10 @@ public class DatabaseViews {
         }
     }
 
+    //Sub method in View Staff Members case that views all attributes from the Manager table
     public static void viewManagers(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all attributes from Manager table 
         String sql = "SELECT sm.staffID, sm.firstName, sm.lastName, sm.phoneNumber, " +
                      "       sm.email, sm.hireDate, sm.salary, " +
                      "       m.department, m.officeLocation, m.experience " +

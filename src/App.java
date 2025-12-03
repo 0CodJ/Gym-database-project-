@@ -1,3 +1,5 @@
+//This java file consists of the main class for the gym database project 
+
 import java.sql.*;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -6,6 +8,7 @@ import java.util.Scanner;
 
 public class App {
 
+    //Declare connection and scanner objects 
     private static Connection conn;
     private static Scanner scanner = new Scanner(System.in);
 
@@ -20,6 +23,7 @@ public class App {
             return;
         }
 
+        //Get database connection properties from app.properties file
         String url = props.getProperty("db.url");
         String username = props.getProperty("db.username");
         String password = props.getProperty("db.password");
@@ -52,7 +56,7 @@ public class App {
             
             
             try {
-                switch (choice) {
+                switch (choice) { //switch statements which are used for the option menu in the UI 
                     case 1:
                         DatabaseViews.viewGymMembers(conn);
                         break;
@@ -98,6 +102,9 @@ public class App {
                     case 15:
                         DatabaseInsertions.insertStaffMember(conn, scanner);
                         break;
+                    case 16: 
+                        DatabaseDeletions.deleteGymMember(conn,scanner);
+                        break;
                     case 0:
                         running = false;
                         System.out.println("Exiting...");
@@ -134,14 +141,14 @@ public class App {
         System.out.println("Note: How the terminal is zoomed can affect the output of the table columns, so please zoom out to see the full output.");
         System.out.println("Enter the number of the option you want to select:");
         System.out.println("\n-------------------------------------");
-        System.out.println("View Options:");
+        System.out.println("View/Selection Options:");
         System.out.println("1. View Gym Members");
         System.out.println("2. View All Memberships");
         System.out.println("3. View Staff Members");
         System.out.println("4. View Plans");
         System.out.println("5. View Payments");
         System.out.println("6. View Check-Ins");
-        System.out.println("7. View Active Members");
+        System.out.println("7. View Active Members (Uses a view created in the database)");
         System.out.println("8. View Trainer Trains Member");
         System.out.println("9. View Guest Members");
         System.out.println("10. View Guest Visits");
@@ -153,10 +160,13 @@ public class App {
         System.out.println("14. Purchase Membership");
         System.out.println("15. Insert Staff Member");
         System.out.println("-------------------------------------");
+        System.out.println("Deletion Options:");
+        System.out.println("16. Delete Gym Member");
         System.out.println("\n0. Exit");
         System.out.println("=====================================");
     }
 
+    //Method to get integer input from user (also ensures that invalid inputs are handled properly)
     private static int getIntInput(String prompt) { 
         System.out.print(prompt);
         if (!scanner.hasNextInt()) {

@@ -1,8 +1,13 @@
+//This java file consists of the methods for the insertion cases of the gym database project 
+
 import java.sql.*;
 import java.util.Scanner;
 
 public class DatabaseInsertions {
 
+    //Declare scanner object to be used in all the helper methods
+    private static Scanner scanner = new Scanner(System.in);
+    
     // Helper method to get string input from user
     private static String getStringInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
@@ -25,7 +30,7 @@ public class DatabaseInsertions {
         if (email == null || email.isEmpty()) {
             return true; // Optional field
         }
-        // Basic email validation: must contain @ and at least one dot after @
+        //Validates string but making sure it contains @ and at least one dot after @
         return email.matches("^[^@]+@[^@]+\\.[^@]+$");
     }
 
@@ -47,7 +52,7 @@ public class DatabaseInsertions {
         return schedule.matches(singleDayPattern) || schedule.matches(multipleDayPattern);
     }
 
-    // Helper method to calculate age from birthday
+    // Helper method to calculate age from birthday to verify age of gym member is >= 16 
     private static int calculateAge(java.sql.Date birthday) {
         java.util.Calendar birthCal = java.util.Calendar.getInstance();
         birthCal.setTime(birthday);
@@ -64,11 +69,13 @@ public class DatabaseInsertions {
         return age;
     }
 
+
+    //Case 13 of the main menu. This method contains all the lgoc for inserting a new gym member into the database 
     public static void insertGymMember(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Insert New Gym Member ===");
         System.out.println();
         
-        // Get required fields
+        // Get required fields/attributes for the gym member 
         String firstName = getStringInput(scanner, "Enter first name: ");
         if (firstName.isEmpty()) {
             System.out.println("Error: First name is required.");
@@ -95,7 +102,7 @@ public class DatabaseInsertions {
             return;
         }
         
-        // Validate date format
+        // Validate date format for consistency 
         if (!birthday.matches("\\d{4}-\\d{2}-\\d{2}")) {
             System.out.println("Error: Invalid date format. Please use YYYY-MM-DD format.");
             return;
@@ -114,7 +121,7 @@ public class DatabaseInsertions {
             }
             
             // Calculate age and reject if under 16
-            int age = calculateAge(birthdayDate);
+            int age = calculateAge(birthdayDate); //use calculateAge helper method 
             if (age < 16) {
                 System.out.println("\n✗ Error: This member is under 16 years old (" + age + " years).");
                 System.out.println("   Members must be at least 16 years old to be added to the database.");
@@ -125,13 +132,13 @@ public class DatabaseInsertions {
             return;
         }
         
-        // Get optional fields
+        //Phone number attribute is optional 
         System.out.print("Enter phone number (optional, 10 digits only, press Enter to skip): ");
         String phoneNumber = scanner.nextLine().trim();
         if (phoneNumber.isEmpty()) {
             phoneNumber = null;
         } else {
-            // Remove any dashes, spaces, or other non-digit characters
+            // Remove any dashes, spaces, or other non-digit characters for consistency of database 
             phoneNumber = phoneNumber.replaceAll("[^\\d]", "");
             if (phoneNumber.isEmpty()) {
                 System.out.println("Error: Phone number must contain 10 digits.");
@@ -149,12 +156,13 @@ public class DatabaseInsertions {
             }
         }
         
+        //Email is optional 
         System.out.print("Enter email (optional, press Enter to skip): ");
         String email = scanner.nextLine().trim();
         if (email.isEmpty()) {
             email = null;
         } else {
-            if (!isValidEmail(email)) {
+            if (!isValidEmail(email)) { //uses isValidEmail helper method for proper email format 
                 System.out.println("Error: Invalid email format. Email must contain @ symbol and a domain (e.g., .com).");
                 return;
             }
@@ -208,7 +216,7 @@ public class DatabaseInsertions {
         }
     }
 
-    // Helper method to get integer input from user
+    //Helper method to get integer input from user while also checking if the input is valid 
     private static int getIntInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
         if (!scanner.hasNextInt()) {
@@ -296,8 +304,8 @@ public class DatabaseInsertions {
             }
             
             // Display output
-            DatabaseViews.printTableRow(headers, colWidths);
-            DatabaseViews.printTableSeparator(colWidths);
+            DatabaseViews.printTableRow(headers, colWidths); //Uses printTableRow method from DatabaseViews.java file 
+            DatabaseViews.printTableSeparator(colWidths); //Uses printTableSeparator method from DatabaseViews.java file 
             
             // Print data rows
             for (String[] row : rows) {
@@ -306,7 +314,7 @@ public class DatabaseInsertions {
         }
     }
 
-    // Helper method to display desk staff
+    // Helper method to display only desk staff members to process a gym member's membership purchase 
     private static void displayDeskStaff(Connection conn) throws SQLException {
         String sql = "SELECT d.staffID, sm.firstName, sm.lastName " +
                      "FROM Desk d " +
@@ -321,7 +329,7 @@ public class DatabaseInsertions {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasDeskStaff = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop to get all the desk staff members from database 
                 hasDeskStaff = true;
                 int staffID = rs.getInt("staffID");
                 String firstName = rs.getString("firstName");
@@ -337,7 +345,7 @@ public class DatabaseInsertions {
                 return;
             }
             
-            // Calculate column widths
+            // Calculate column widths for helper methods
             int[] colWidths = {0, 0}; // temporary column widths
             String[] headers = {"Staff ID", "Name"};
             
@@ -352,8 +360,8 @@ public class DatabaseInsertions {
             }
             
             // Display output
-            DatabaseViews.printTableRow(headers, colWidths);
-            DatabaseViews.printTableSeparator(colWidths);
+            DatabaseViews.printTableRow(headers, colWidths); //Uses printTableRow method from DatabaseViews.java file 
+            DatabaseViews.printTableSeparator(colWidths); //Uses printTableSeparator method from DatabaseViews.java file 
             
             // Print data rows
             for (String[] row : rows) {
@@ -380,6 +388,7 @@ public class DatabaseInsertions {
         return false;
     }
 
+    //Case 14 of the main menu. This method has all the logic for inserting a new membership for a new gym member 
     public static void purchaseMembership(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Purchase Membership ===");
         System.out.println();
@@ -389,7 +398,7 @@ public class DatabaseInsertions {
         conn.setAutoCommit(false);
         
         try {
-            // Step 1: Get member ID
+            //Get member ID
             int memberID = getIntInput(scanner, "Enter member ID: ");
             if (memberID <= 0) {
                 System.out.println("Error: Invalid member ID.");
@@ -398,7 +407,7 @@ public class DatabaseInsertions {
                 return;
             }
             
-            // Verify member exists
+            // Verify member exists in GymMember table
             String checkMemberSql = "SELECT memberID, firstName, lastName FROM GymMember WHERE memberID = ?";
             String memberName = "";
             try (PreparedStatement ps = conn.prepareStatement(checkMemberSql)) {
@@ -414,7 +423,7 @@ public class DatabaseInsertions {
                 }
             }
             
-            // Step 2: Verify member age >= 16
+            //Verify member age >= 16 else rollback and show error message 
             if (!verifyMemberAge(conn, memberID)) {
                 System.out.println("Error: Member must be at least 16 years old to purchase a membership.");
                 conn.rollback();
@@ -422,7 +431,7 @@ public class DatabaseInsertions {
                 return;
             }
             
-            // Step 3: Check for existing active membership
+            //Check for existing active membership
             if (hasActiveMembership(conn, memberID)) {
                 System.out.println("Error: Member already has an Active membership.");
                 System.out.println("   A member can only have one Active membership at a time.");
@@ -431,7 +440,7 @@ public class DatabaseInsertions {
                 return;
             }
             
-            // Step 4: Display and select plan
+            //Display and select plan
             displayPlans(conn);
             int planID = getIntInput(scanner, "\nEnter plan ID: ");
             if (planID <= 0) {
@@ -462,14 +471,14 @@ public class DatabaseInsertions {
                 }
             }
             
-            // Step 5: Get start date (default to today)
+            //Get start date (default to today if no input is provided)
             System.out.print("Enter start date (YYYY-MM-DD, press Enter for today): ");
             String startDateStr = scanner.nextLine().trim();
             java.sql.Date startDate;
             if (startDateStr.isEmpty()) {
                 startDate = new java.sql.Date(System.currentTimeMillis());
             } else {
-                if (!startDateStr.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                if (!startDateStr.matches("\\d{4}-\\d{2}-\\d{2}")) { //validates date format 
                     System.out.println("Error: Invalid date format. Please use YYYY-MM-DD format.");
                     conn.rollback();
                     conn.setAutoCommit(originalAutoCommit);
@@ -488,7 +497,7 @@ public class DatabaseInsertions {
             // Calculate end date based on plan type
             java.sql.Date endDate = calculateEndDate(startDate, planType);
             
-            // Step 6: Display and select desk staff
+            //Display and select desk staff
             displayDeskStaff(conn);
             int staffID = getIntInput(scanner, "\nEnter desk staff ID (who is processing the payment): ");
             if (staffID <= 0) {
@@ -512,7 +521,7 @@ public class DatabaseInsertions {
                 }
             }
             
-            // Step 7: Get payment type
+            //Get payment type
             System.out.println("\nPayment Types:");
             System.out.println("1. CASH");
             System.out.println("2. CARD");
@@ -537,7 +546,7 @@ public class DatabaseInsertions {
                     return;
             }
             
-            // Step 8: Create membership with status 'Active'
+            //Create membership with status 'Active' in Membership table and thorws exception if theres an error
             String insertMembershipSql = "INSERT INTO Membership (memberID, planID, startDate, endDate, status) " +
                                         "VALUES (?, ?, ?, ?, 'Active')";
             try (PreparedStatement ps = conn.prepareStatement(insertMembershipSql)) {
@@ -552,7 +561,7 @@ public class DatabaseInsertions {
                 }
             }
             
-            // Step 9: Create payment with status 'Success'
+            //Create payment with status 'Success' and throws exception if theres an error
             String insertPaymentSql = "INSERT INTO Payment (staffID, memberID, amount, paymentType, status) " +
                                      "VALUES (?, ?, ?, ?, 'Success')";
             try (PreparedStatement ps = conn.prepareStatement(insertPaymentSql)) {
@@ -567,7 +576,7 @@ public class DatabaseInsertions {
                 }
             }
             
-            // Step 10: Commit transaction
+            //Commit transaction
             conn.commit();
             System.out.println("\n Success! Membership purchased and activated.");
             System.out.println("  Member: " + memberName + " (ID: " + memberID + ")");
@@ -588,6 +597,8 @@ public class DatabaseInsertions {
         }
     }
 
+
+    //Case 15 of the main menu. This method has all the logic for inserting a new staff member into the databse 
     public static void insertStaffMember(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Insert New Staff Member ===");
         System.out.println();
@@ -597,7 +608,7 @@ public class DatabaseInsertions {
         conn.setAutoCommit(false);
         
         try {
-            // Step 1: Get shared staff information
+            //Get shared staff attributes
             String firstName = getStringInput(scanner, "Enter first name: ");
             if (firstName.isEmpty()) {
                 System.out.println("Error: First name is required.");
@@ -630,7 +641,7 @@ public class DatabaseInsertions {
             String phoneNumber = scanner.nextLine().trim();
             if (phoneNumber.isEmpty()) {
                 phoneNumber = null;
-            } else {
+            } else { //Checks for cases where the phone number is not inputted properly 
                 // Remove any dashes, spaces, or other non-digit characters
                 phoneNumber = phoneNumber.replaceAll("[^\\d]", "");
                 if (phoneNumber.isEmpty()) {
@@ -662,13 +673,13 @@ public class DatabaseInsertions {
             }
             
             String hireDateStr = getDateInput(scanner, "Enter hire date (required)");
-            if (hireDateStr.isEmpty()) {
+            if (hireDateStr.isEmpty()) { //Case where the hire date is empty 
                 System.out.println("Error: Hire date is required.");
                 conn.rollback();
                 conn.setAutoCommit(originalAutoCommit);
                 return;
             }
-            if (!hireDateStr.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            if (!hireDateStr.matches("\\d{4}-\\d{2}-\\d{2}")) { //case where the format of the hire date is wrong 
                 System.out.println("Error: Invalid date format. Please use YYYY-MM-DD format.");
                 conn.rollback();
                 conn.setAutoCommit(originalAutoCommit);
@@ -686,7 +697,7 @@ public class DatabaseInsertions {
             
             System.out.print("Enter salary (required, decimal >= 0): ");
             String salaryStr = scanner.nextLine().trim();
-            if (salaryStr.isEmpty()) {
+            if (salaryStr.isEmpty()) { //if salary is empty, rollback and show error message 
                 System.out.println("Error: Salary is required.");
                 conn.rollback();
                 conn.setAutoCommit(originalAutoCommit);
@@ -695,20 +706,20 @@ public class DatabaseInsertions {
             Double salary;
             try {
                 salary = Double.parseDouble(salaryStr);
-                if (salary < 0) {
+                if (salary < 0) { //if salary is a negative number, rollback and show error message
                     System.out.println("Error: Salary must be >= 0.");
                     conn.rollback();
                     conn.setAutoCommit(originalAutoCommit);
                     return;
                 }
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException e) { //if the salary is not a number, rollback and show error message
                 System.out.println("Error: Invalid salary format.");
                 conn.rollback();
                 conn.setAutoCommit(originalAutoCommit);
                 return;
             }
             
-            // Step 2: Insert into StaffMember
+            //Make prepared statemetns to insert the new staff member into the staff member table as well 
             String insertStaffSql = "INSERT INTO StaffMember (firstName, lastName, phoneNumber, email, hireDate, salary) " +
                                    "VALUES (?, ?, ?, ?, ?, ?)";
             int staffID = 0;
@@ -744,31 +755,31 @@ public class DatabaseInsertions {
                 }
             }
             
-            // Step 3: Ask for role/sub-entity
+            // Ask for staff role/sub-entity of staff table 
             System.out.println("\nSelect staff role:");
             System.out.println("1. Desk Staff");
             System.out.println("2. Trainer");
             System.out.println("3. Manager");
             int roleChoice = getIntInput(scanner, "Enter your choice (1-3): ");
             
-            if (roleChoice < 1 || roleChoice > 3) {
+            if (roleChoice < 1 || roleChoice > 3) { //ensure user types the right numbers 
                 System.out.println("Error: Invalid role selection. Must be 1, 2, or 3.");
                 conn.rollback();
                 conn.setAutoCommit(originalAutoCommit);
                 return;
             }
             
-            if (roleChoice == 1) {
+            if (roleChoice == 1) { //if the new staff member is taking a desk staff role 
                 // Insert into Desk
                 System.out.print("Enter schedule (required, format: Mon- 9AM-5PM or Mon-Fri 9AM-5PM): ");
                 String schedule = scanner.nextLine().trim();
-                if (schedule.isEmpty()) {
+                if (schedule.isEmpty()) { //Case where the scuedle attribute is empty 
                     System.out.println("Error: Schedule is required.");
                     conn.rollback();
                     conn.setAutoCommit(originalAutoCommit);
                     return;
                 }
-                if (!isValidScheduleFormat(schedule)) {
+                if (!isValidScheduleFormat(schedule)) { //case where the schedule format is invalid 
                     System.out.println("Error: Invalid schedule format. Use 'Mon- 9AM-5PM' for single day or 'Mon-Fri 9AM-5PM' for multiple days.");
                     conn.rollback();
                     conn.setAutoCommit(originalAutoCommit);
@@ -791,6 +802,7 @@ public class DatabaseInsertions {
                     return;
                 }
                 
+                //Make prepared statemetns to insert the new staff member into the desk table 
                 String insertDeskSql = "INSERT INTO Desk (staffID, schedule, deskLocation, responsibility) " +
                                       "VALUES (?, ?, ?, ?)";
                 try (PreparedStatement ps = conn.prepareStatement(insertDeskSql)) {
@@ -805,8 +817,8 @@ public class DatabaseInsertions {
                     }
                 }
                 
-            } else if (roleChoice == 2) {
-                // Insert into Trainer
+            } else if (roleChoice == 2) { //If the new staff member is taking a trainer role 
+                // Insert into Trainer table with respective attributes 
                 System.out.print("Enter specialty (optional, press Enter to skip): ");
                 String specialty = scanner.nextLine().trim();
                 if (specialty.isEmpty()) {
@@ -844,6 +856,8 @@ public class DatabaseInsertions {
                     return;
                 }
                 
+
+                //Make prepared statemetns to insert the new staff member into the trainer table 
                 String insertTrainerSql = "INSERT INTO Trainer (staffID, specialty, schedule, certificationLevel, experience) " +
                                          "VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement ps = conn.prepareStatement(insertTrainerSql)) {
@@ -863,7 +877,7 @@ public class DatabaseInsertions {
                     }
                 }
                 
-            } else if (roleChoice == 3) {
+            } else if (roleChoice == 3) { //if the new staff member is taking a manager role
                 // Insert into Manager
                 String department = getStringInput(scanner, "Enter department: ");
                 if (department.isEmpty()) {
@@ -901,6 +915,7 @@ public class DatabaseInsertions {
                     }
                 }
                 
+                //Make prepared statemetns to insert the new staff member into the manager table 
                 String insertManagerSql = "INSERT INTO Manager (staffID, department, officeLocation, experience) " +
                                          "VALUES (?, ?, ?, ?)";
                 try (PreparedStatement ps = conn.prepareStatement(insertManagerSql)) {
