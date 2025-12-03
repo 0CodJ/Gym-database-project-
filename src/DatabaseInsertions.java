@@ -976,5 +976,272 @@ public class DatabaseInsertions {
             conn.setAutoCommit(originalAutoCommit);
         }
     }
+
+    // Insert a new Plan (adds to Plan table using existing PlanTypeInfo)
+    public static void insertPlan(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("\n=== Insert New Plan ===");
+        System.out.println();
+        
+        // First, show existing plan types
+        System.out.println("Available Plan Types (from PlanTypeInfo):");
+        String showTypesSql = "SELECT planType, price FROM PlanTypeInfo ORDER BY price";
+        try (PreparedStatement ps = conn.prepareStatement(showTypesSql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            java.util.List<String[]> rows = new java.util.ArrayList<>();
+            boolean hasTypes = false;
+            
+            while (rs.next()) {
+                hasTypes = true;
+                rows.add(new String[]{
+                    rs.getString("planType"),
+                    String.format("$%.2f", rs.getDouble("price"))
+                });
+            }
+            
+            if (!hasTypes) {
+                System.out.println("No plan types exist in the database.");
+                System.out.println("Would you like to create a plan type first? (y/n): ");
+                String choice = scanner.nextLine().trim().toLowerCase();
+                if (choice.equals("y") || choice.equals("yes")) {
+                    insertPlanType(conn, scanner);
+                    // Re-run this method after creating plan type
+                    insertPlan(conn, scanner);
+                }
+                return;
+            }
+            
+            int[] colWidths = {0, 0};
+            String[] headers = {"Plan Type", "Price"};
+            
+            for (int i = 0; i < headers.length; i++) {
+                colWidths[i] = Math.max(colWidths[i], headers[i].length());
+            }
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    colWidths[i] = Math.max(colWidths[i], row[i].length());
+                }
+            }
+            
+            DatabaseViews.printTableRow(headers, colWidths);
+            DatabaseViews.printTableSeparator(colWidths);
+            for (String[] row : rows) {
+                DatabaseViews.printTableRow(row, colWidths);
+            }
+        }
+        
+        System.out.println();
+        System.out.println("Select plan type to create a new plan:");
+        System.out.println("1. Monthly");
+        System.out.println("2. Monthly Premium");
+        System.out.println("3. Annual");
+        System.out.println("0. Cancel");
+        
+        int choice = getIntInput(scanner, "Enter your choice: ");
+        
+        String planType = "";
+        switch (choice) {
+            case 1:
+                planType = "Monthly";
+                break;
+            case 2:
+                planType = "Monthly Premium";
+                break;
+            case 3:
+                planType = "Annual";
+                break;
+            case 0:
+                System.out.println("Cancelled.");
+                return;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+        
+        // Insert new plan with the selected plan type
+        String insertSql = "INSERT INTO Plan (planType) VALUES (?)";
+        try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, planType);
+            
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int planID = generatedKeys.getInt(1);
+                        System.out.println("\n✓ Success! New plan created.");
+                        System.out.println("  Plan ID: " + planID);
+                        System.out.println("  Plan Type: " + planType);
+                    }
+                }
+            } else {
+                System.out.println("\nError: Failed to create plan.");
+            }
+        }
+    }
+
+    // Insert a new PlanType (for setting up the database initially)
+    public static void insertPlanType(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("\n=== Insert New Plan Type ===");
+        System.out.println();
+        System.out.println("Note: Plan types are predefined as ENUM values in the database.");
+        System.out.println("Available plan types: Monthly, Monthly Premium, Annual");
+        System.out.println();
+        
+        // Show existing plan types
+        System.out.println("Current Plan Types in database:");
+        String showTypesSql = "SELECT planType, price FROM PlanTypeInfo ORDER BY price";
+        try (PreparedStatement ps = conn.prepareStatement(showTypesSql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            boolean hasTypes = false;
+            while (rs.next()) {
+                hasTypes = true;
+                System.out.println("  - " + rs.getString("planType") + ": $" + String.format("%.2f", rs.getDouble("price")));
+            }
+            
+            if (!hasTypes) {
+                System.out.println("  (none)");
+            }
+        }
+        
+        System.out.println();
+        System.out.println("Select plan type to add:");
+        System.out.println("1. Monthly");
+        System.out.println("2. Monthly Premium");
+        System.out.println("3. Annual");
+        System.out.println("0. Cancel");
+        
+        int choice = getIntInput(scanner, "Enter your choice: ");
+        
+        String planType = "";
+        switch (choice) {
+            case 1:
+                planType = "Monthly";
+                break;
+            case 2:
+                planType = "Monthly Premium";
+                break;
+            case 3:
+                planType = "Annual";
+                break;
+            case 0:
+                System.out.println("Cancelled.");
+                return;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+        
+        // Get price for the plan type
+        System.out.print("Enter price for " + planType + " plan (e.g., 29.99): $");
+        String priceStr = scanner.nextLine().trim();
+        if (priceStr.isEmpty()) {
+            System.out.println("Error: Price is required.");
+            return;
+        }
+        
+        double price;
+        try {
+            price = Double.parseDouble(priceStr);
+            if (price <= 0) {
+                System.out.println("Error: Price must be greater than 0.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid price format.");
+            return;
+        }
+        
+        // Insert new plan type
+        String insertSql = "INSERT INTO PlanTypeInfo (planType, price) VALUES (?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+            ps.setString(1, planType);
+            ps.setDouble(2, price);
+            
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("\n✓ Success! Plan type created.");
+                System.out.println("  Plan Type: " + planType);
+                System.out.println("  Price: $" + String.format("%.2f", price));
+            } else {
+                System.out.println("\nError: Failed to create plan type.");
+            }
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1062) { // Duplicate entry
+                System.out.println("\n✗ Error: This plan type already exists.");
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    // Setup all default plans (convenience method for initial database setup)
+    public static void setupDefaultPlans(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("\n=== Setup Default Plans ===");
+        System.out.println();
+        System.out.println("This will create the default plan types and plans for the gym.");
+        System.out.println("Default plan types:");
+        System.out.println("  - Monthly: $29.99");
+        System.out.println("  - Monthly Premium: $49.99");
+        System.out.println("  - Annual: $299.99");
+        System.out.println();
+        System.out.print("Do you want to proceed? (y/n): ");
+        
+        String choice = scanner.nextLine().trim().toLowerCase();
+        if (!choice.equals("y") && !choice.equals("yes")) {
+            System.out.println("Setup cancelled.");
+            return;
+        }
+        
+        // Disable auto-commit for transaction
+        boolean originalAutoCommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        
+        try {
+            // Insert plan types (ignore if already exist)
+            String insertTypeSql = "INSERT IGNORE INTO PlanTypeInfo (planType, price) VALUES (?, ?)";
+            
+            try (PreparedStatement ps = conn.prepareStatement(insertTypeSql)) {
+                // Monthly
+                ps.setString(1, "Monthly");
+                ps.setDouble(2, 29.99);
+                ps.executeUpdate();
+                
+                // Monthly Premium
+                ps.setString(1, "Monthly Premium");
+                ps.setDouble(2, 49.99);
+                ps.executeUpdate();
+                
+                // Annual
+                ps.setString(1, "Annual");
+                ps.setDouble(2, 299.99);
+                ps.executeUpdate();
+            }
+            
+            // Insert plans for each type
+            String insertPlanSql = "INSERT INTO Plan (planType) VALUES (?)";
+            try (PreparedStatement ps = conn.prepareStatement(insertPlanSql)) {
+                ps.setString(1, "Monthly");
+                ps.executeUpdate();
+                
+                ps.setString(1, "Monthly Premium");
+                ps.executeUpdate();
+                
+                ps.setString(1, "Annual");
+                ps.executeUpdate();
+            }
+            
+            conn.commit();
+            System.out.println("\n✓ Success! Default plans have been set up.");
+            System.out.println("  Created 3 plan types and 3 plans.");
+            
+        } catch (SQLException e) {
+            conn.rollback();
+            System.out.println("\n✗ Error: Setup failed. " + e.getMessage());
+            throw e;
+        } finally {
+            conn.setAutoCommit(originalAutoCommit);
+        }
+    }
 }
 

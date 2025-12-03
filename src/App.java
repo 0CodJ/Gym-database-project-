@@ -102,8 +102,29 @@ public class App {
                     case 15:
                         DatabaseInsertions.insertStaffMember(conn, scanner);
                         break;
-                    case 16: 
-                        DatabaseDeletions.deleteGymMember(conn,scanner);
+                    case 16:
+                        DatabaseInsertions.insertPlan(conn, scanner);
+                        break;
+                    case 17:
+                        DatabaseInsertions.setupDefaultPlans(conn, scanner);
+                        break;
+                    case 18: 
+                        DatabaseUpdates.updateGymMember(conn, scanner);
+                        break;
+                    case 19:
+                        DatabaseUpdates.updateMembershipStatus(conn, scanner);
+                        break;
+                    case 20:
+                        DatabaseUpdates.updateStaffSalary(conn, scanner);
+                        break;
+                    case 21:
+                        DatabaseUpdates.updatePaymentStatus(conn, scanner);
+                        break;
+                    case 22:
+                        DatabaseDeletions.deleteGymMember(conn, scanner);
+                        break;
+                    case 23:
+                        DatabaseUpdates.transferMembershipPlan(conn, scanner);
                         break;
                     case 0:
                         running = false;
@@ -157,11 +178,22 @@ public class App {
         System.out.println("-------------------------------------");
         System.out.println("Insertion Options:");
         System.out.println("13. Add new Gym Member");
-        System.out.println("14. Purchase Membership");
+        System.out.println("14. Purchase Membership (Transaction Demo)");
         System.out.println("15. Insert Staff Member");
+        System.out.println("16. Add New Plan");
+        System.out.println("17. Setup Default Plans (Quick Setup)");
+        System.out.println("-------------------------------------");
+        System.out.println("Update Options:");
+        System.out.println("18. Update Gym Member");
+        System.out.println("19. Update Membership Status");
+        System.out.println("20. Update Staff Salary");
+        System.out.println("21. Update Payment Status");
         System.out.println("-------------------------------------");
         System.out.println("Deletion Options:");
-        System.out.println("16. Delete Gym Member");
+        System.out.println("22. Delete Gym Member");
+        System.out.println("-------------------------------------");
+        System.out.println("Transaction Demo:");
+        System.out.println("23. Transfer Membership Plan (COMMIT/ROLLBACK Demo)");
         System.out.println("\n0. Exit");
         System.out.println("=====================================");
     }
