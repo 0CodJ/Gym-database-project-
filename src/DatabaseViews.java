@@ -695,6 +695,7 @@ public class DatabaseViews {
         }
     }
 
+    //Case 4 method that views all attributes from the Plan table
     public static void viewPlans(Connection conn) throws SQLException {
         String sql = "SELECT p.planID, pt.planType, pt.price " +
                      "FROM Plan p " +
@@ -712,7 +713,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasPlans = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasPlans = true;
                 int planID = rs.getInt("planID");
                 
@@ -741,8 +742,8 @@ public class DatabaseViews {
                 return;
             }
             
-            // Calculate column widths
-            int[] colWidths = {10, 20, 12}; //temporary column widths
+            // Portion that creates a visual table for output 
+            int[] colWidths = {0, 0, 0}; //temporary column widths
             String[] headers = {"Plan ID", "Plan Type", "Price"};
             
             // Adjust widths based on actual data
@@ -767,7 +768,10 @@ public class DatabaseViews {
         }
     }
 
+    //Case 5 method that views all attributes from Payment table 
     public static void viewPayments(Connection conn) throws SQLException {
+
+        //Create prepared statements to select all attributes from Payment table 
         String sql = "SELECT p.paymentID, p.staffID, sm.firstName AS staffFirstName, sm.lastName AS staffLastName, " +
                      "       p.memberID, gm.firstName AS memberFirstName, gm.lastName AS memberLastName, " +
                      "       p.amount, p.paymentType, p.dateOfPayment, p.status " +
@@ -788,7 +792,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasPayments = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasPayments = true;
                 int paymentID = rs.getInt("paymentID");
                 int staffID = rs.getInt("staffID");
@@ -865,8 +869,8 @@ public class DatabaseViews {
                 return;
             }
             
-            // Calculate column widths
-            int[] colWidths = {12, 10, 20, 12, 25, 12, 15, 15, 12}; //temporary column widths
+            // Portion that creates a visual table for output 
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0, 0, 0}; //temporary column widths
             String[] headers = {"Payment ID", "Staff ID", "Staff Name", "Member ID", "Member Name", "Amount", "Payment Type", "Date of Payment", "Status"};
             
             // Adjust widths based on actual data
@@ -891,6 +895,7 @@ public class DatabaseViews {
         }
     }
 
+    //Case 6 method that views all attributes from the CheckIn table
     public static void viewCheckIns(Connection conn) throws SQLException {
         String sql = "SELECT c.checkInID, c.membershipID, c.staffID, c.ts, c.location " +
                      "FROM CheckIn c " +
@@ -907,7 +912,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasCheckIns = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasCheckIns = true;
                 int checkInID = rs.getInt("checkInID");
                 int membershipID = rs.getInt("membershipID");
@@ -940,8 +945,8 @@ public class DatabaseViews {
                 return;
             }
             
-            // Calculate column widths
-            int[] colWidths = {12, 15, 10, 20, 15}; //temporary column widths
+            // Portion that creates a visual table for output 
+            int[] colWidths = {0, 0, 0, 0, 0}; //temporary column widths
             String[] headers = {"Check-In ID", "Membership ID", "Staff ID", "Timestamp", "Location"};
             
             // Adjust widths based on actual data
@@ -979,7 +984,10 @@ public class DatabaseViews {
         return value;
     }
 
+    //Case 7 method that views the relationships of trainers that train members 
     public static void viewTrainerTrainsMember(Connection conn) throws SQLException {
+        
+        //Create prepareed statements for all attributes of TrainerTrainsMember table
         String sql = "SELECT ttm.trainerID, sm.firstName AS trainerFirstName, sm.lastName AS trainerLastName, " +
                      "       ttm.memberID, gm.firstName AS memberFirstName, gm.lastName AS memberLastName " +
                      "FROM TrainerTrainsMember ttm " +
@@ -999,7 +1007,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasRelationships = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasRelationships = true;
                 int trainerID = rs.getInt("trainerID");
                 
@@ -1066,6 +1074,8 @@ public class DatabaseViews {
 
     // Case 9 function to view guest members
     public static void viewGuestMembers(Connection conn) throws SQLException {
+
+        //Create prepared statement to select all attributes from Guest table 
         String sql = "SELECT g.guestID, g.firstName, g.lastName, g.birthday, " +
                      "       g.relationshipToMember, g.memberID, " +
                      "       gm.firstName AS memberFirstName, gm.lastName AS memberLastName " +
@@ -1073,7 +1083,7 @@ public class DatabaseViews {
                      "LEFT JOIN GymMember gm ON g.memberID = gm.memberID " +
                      "ORDER BY g.guestID;";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             System.out.println("\n=== Guest Members ===");
             System.out.println();
@@ -1083,7 +1093,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasGuests = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasGuests = true;
                 int guestID = rs.getInt("guestID");
                 
@@ -1173,7 +1183,7 @@ public class DatabaseViews {
         }
     }
 
-    // Case 10 function to view guest visits
+    // Case 10 method that views all attributes from the GuestVisit table
     public static void viewGuestVisits(Connection conn) throws SQLException {
         String sql = "SELECT gv.visitID, gv.guestID, g.firstName AS guestFirstName, g.lastName AS guestLastName, " +
                      "       gv.visitDate, g.memberID, " +
@@ -1254,7 +1264,7 @@ public class DatabaseViews {
             }
             
             // Calculate column widths
-            int[] colWidths = {10, 10, 25, 12, 10, 25}; // temporary column widths
+            int[] colWidths = {0, 0, 0, 0, 0, 0}; // temporary column widths
             String[] headers = {"Visit ID", "Guest ID", "Guest Name", "Visit Date", "Member ID", "Member Name"};
             
             // Adjust widths based on actual data
@@ -1279,6 +1289,7 @@ public class DatabaseViews {
         }
     }
 
+    //Sub menu for case 3. Allows user to decide how the staff table should be displayed. 
     public static void viewStaffMembers(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Staff Members Menu ===");
         System.out.println("1. View All Staff Members");
@@ -1309,7 +1320,7 @@ public class DatabaseViews {
         }
     }
 
-    // Method to view active members using the ActiveMembersView
+    //Case 7 method that views all attributes from the ActiveMembersView (with an SQL view created in the database)
     public static void viewActiveMembersView(Connection conn) throws SQLException {
         String sql = "SELECT * FROM ActiveMembersView ORDER BY memberID;";
 
@@ -1323,7 +1334,7 @@ public class DatabaseViews {
             java.util.List<String[]> rows = new java.util.ArrayList<>();
             boolean hasMembers = false;
             
-            while (rs.next()) {
+            while (rs.next()) { //loop through each row 
                 hasMembers = true;
                 int memberID = rs.getInt("memberID");
                 
@@ -1392,7 +1403,7 @@ public class DatabaseViews {
             }
             
             // Calculate column widths
-            int[] colWidths = {10, 25, 25, 15, 12, 12, 12, 20, 12}; // temporary column widths
+            int[] colWidths = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // temporary column widths
             String[] headers = {"Member ID", "Member Name", "Email", "Phone Number", "Membership ID", "Start Date", "End Date", "Plan Type", "Price"};
             
             // Adjust widths based on actual data
@@ -1417,7 +1428,7 @@ public class DatabaseViews {
         }
     }
 
-    // Method to call the GetMemberPaymentHistory stored procedure
+    //Case 11 method that views the payment history of a specific member (uses a SQL procedure that was created in the database)
     public static void viewMemberPaymentHistory(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Member Payment History ===");
         System.out.println();
@@ -1428,7 +1439,7 @@ public class DatabaseViews {
             return;
         }
         
-        // Call stored procedure using CallableStatement
+        // Create prepared statement to call the GetMemberPaymentHistory stored procedure 
         String sql = "{call GetMemberPaymentHistory(?)}";
         
         try (CallableStatement cs = conn.prepareCall(sql)) {
@@ -1438,7 +1449,7 @@ public class DatabaseViews {
             // Execute and get result set
             boolean hasResults = cs.execute();
             
-            if (hasResults) {
+            if (hasResults) { //if there are results display the payment history 
                 try (ResultSet rs = cs.getResultSet()) {
                     System.out.println("\n=== Payment History for Member ID: " + memberID + " ===");
                     System.out.println();
@@ -1447,7 +1458,7 @@ public class DatabaseViews {
                     java.util.List<String[]> rows = new java.util.ArrayList<>();
                     boolean hasPayments = false;
                     
-                    while (rs.next()) {
+                    while (rs.next()) { //loop through each row 
                         hasPayments = true;
                         int paymentID = rs.getInt("paymentID");
                         
@@ -1492,13 +1503,13 @@ public class DatabaseViews {
                         });
                     }
                     
-                    if (!hasPayments) {
+                    if (!hasPayments) { //if there are no results 
                         System.out.println("No payment history found for member ID: " + memberID);
                         return;
                     }
                     
                     // Calculate column widths
-                    int[] colWidths = {12, 12, 15, 15, 12, 25}; // temporary column widths
+                    int[] colWidths = {0, 0, 0, 0, 0, 0}; // temporary column widths
                     String[] headers = {"Payment ID", "Amount", "Payment Type", "Date of Payment", "Status", "Processed By"};
                     
                     // Adjust widths based on actual data
@@ -1525,7 +1536,7 @@ public class DatabaseViews {
         }
     }
 
-    // Method to call the CalculateTotalRevenue stored function
+    //Case 12 method that views the total revenue of the gym (uses a SQL function that was created in the database)
     public static void viewTotalRevenue(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("\n=== Calculate Total Revenue ===");
         System.out.println();
@@ -1533,7 +1544,7 @@ public class DatabaseViews {
         System.out.println("2. By specific status");
         
         int choice = getIntInput(scanner, "Enter choice (1-2): ");
-        if (choice < 1 || choice > 2) {
+        if (choice < 1 || choice > 2) { //if the user does not type the proper input 
             System.out.println("Error: Invalid choice. Using default (Success payments).");
             choice = 1;
         }
@@ -1552,7 +1563,7 @@ public class DatabaseViews {
             }
         }
         
-        // Call stored function using CallableStatement
+        // Create prepared statement to call the CalculateTotalRevenue stored function
         String sql = "{? = call CalculateTotalRevenue(?)}";
         
         try (CallableStatement cs = conn.prepareCall(sql)) {
@@ -1572,6 +1583,7 @@ public class DatabaseViews {
             // Get the return value
             double totalRevenue = cs.getDouble(1);
             
+            // Portion that dispalys the results 
             System.out.println("\n=== Total Revenue ===");
             System.out.println();
             if (status != null && !status.isEmpty()) {
